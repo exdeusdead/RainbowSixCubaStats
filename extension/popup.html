@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body { font-family: Arial, sans-serif; width: 360px; padding: 12px; }
+      label { display: block; margin-top: 10px; font-weight: bold; }
+      input { width: 100%; box-sizing: border-box; padding: 7px; margin-top: 4px; }
+      button { width: 100%; padding: 9px; margin-top: 12px; cursor: pointer; }
+      pre { white-space: pre-wrap; background: #111; color: #0f0; padding: 8px; max-height: 260px; overflow: auto; }
+      .hint { color: #555; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <h3>Rainbow Six CUBA Stats</h3>
+
+    <label>Discord ID</label>
+    <input id="discordId" placeholder="Ej: 330551605827207169" />
+
+    <label>Stats API URL</label>
+    <input id="apiUrl" placeholder="Ej: http://87.99.138.202:3007" />
+    <div class="hint">Usa http://localhost:3007 si estás probando local.</div>
+
+    <label>API Key</label>
+    <input id="apiKey" placeholder="Opcional si STATS_API_KEY está vacío" />
+
+    <button id="syncCurrent">Sincronizar página actual</button>
+    <button id="syncAll">Sincronizar perfil completo</button>
+
+    <pre id="result">Listo.</pre>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

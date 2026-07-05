@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Rainbow Six CUBA Stats Sync",
+  "version": "1.0.0",
+  "description": "Captura datos de R6 Tracker y los envía al Stats Bot de Rainbow Six CUBA.",
+  "permissions": ["activeTab", "tabs", "storage"],
+  "host_permissions": [
+    "https://r6.tracker.network/*",
+    "http://localhost:3007/*",
+    "http://87.99.138.202:3007/*",
+    "https://*/*",
+    "http://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "R6 CUBA Sync"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://r6.tracker.network/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

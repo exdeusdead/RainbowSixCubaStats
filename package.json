@@ -1,0 +1,16 @@
+{
+  "name": "rainbowsixcuba-stats",
+  "version": "1.0.0",
+  "description": "Rainbow Six CUBA Stats Bot using Chrome Extension/API sync.",
+  "main": "stats.js",
+  "scripts": {
+    "start": "node stats.js",
+    "check": "node -c stats.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "discord.js": "^14.26.4",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
+  }
+}
