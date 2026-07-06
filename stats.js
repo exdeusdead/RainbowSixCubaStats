@@ -37,7 +37,8 @@ const { requireCgpUser } = require("./services/cgpAuth");
 
 const {
   getMembership,
-  createMembership
+  createMembership,
+  updateMembership
 } = require("./services/r6Membership");
 
 const {
@@ -1877,6 +1878,35 @@ function startApiServer() {
       ok: true,
       membership
     });
+  });
+
+
+
+  app.post("/api/internal/r6/membership/:userId/discord", requireApiKey, (req, res) => {
+
+    const membership = updateMembership(
+      req.params.userId,
+      {
+        requirements: {
+          discordGuildMember: true
+        }
+      }
+    );
+
+
+    if (!membership) {
+      return res.status(404).json({
+        ok: false,
+        error: "MEMBERSHIP_NOT_FOUND"
+      });
+    }
+
+
+    res.json({
+      ok: true,
+      membership
+    });
+
   });
 
 

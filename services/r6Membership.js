@@ -87,6 +87,14 @@ function updateMembership(userId, changes) {
   data[userId] = {
     ...data[userId],
     ...changes,
+    requirements: {
+      ...data[userId].requirements,
+      ...(changes.requirements || {})
+    },
+    stats: {
+      ...data[userId].stats,
+      ...(changes.stats || {})
+    },
     updatedAt: new Date().toISOString()
   };
 
