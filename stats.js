@@ -1830,11 +1830,45 @@ function startApiServer() {
     });
   });
 
+  app.get("/api/me", requireCgpUser, (req, res) => {
+    const profiles = loadJson(R6_PROFILES_FILE);
+
+    const discordId =
+      req.cgpUser.identities?.discord?.id;
+
+    const profile =
+      profiles[discordId];
+
+    if (!profile) {
+      return res.status(404).json({
+        ok: false,
+        error: "Profile not found"
+      });
+    }
+
+    res.json({
+      ok: true,
+      userId: req.cgpUser.id,
+      profile: getProfileView(profile)
+    });
+  });
+
+
   app.get("/api/profile/:discordId", requireApiKey, (req, res) => {
     const profiles = loadJson(R6_PROFILES_FILE);
     const profile = profiles[req.params.discordId];
-    if (!profile) return res.status(404).json({ ok: false, error: "Profile not found" });
-    res.json({ ok: true, profile: getProfileView(profile) });
+
+    if (!profile) {
+      return res.status(404).json({
+        ok: false,
+        error: "Profile not found"
+      });
+    }
+
+    res.json({
+      ok: true,
+      profile: getProfileView(profile)
+    });
   });
 
   app.listen(API_PORT, "0.0.0.0", () => {
