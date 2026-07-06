@@ -1935,6 +1935,60 @@ function startApiServer() {
   });
 
 
+
+  app.post("/api/internal/r6/membership/:userId/verify", requireApiKey, (req, res) => {
+
+    let membership = updateMembership(
+      req.params.userId,
+      {
+        requirements: {
+          communityVerified: true
+        }
+      }
+    );
+
+
+    if (!membership) {
+      return res.status(404).json({
+        ok: false,
+        error: "MEMBERSHIP_NOT_FOUND"
+      });
+    }
+
+
+    const r = membership.requirements;
+
+
+    if (
+      r.discordConnected &&
+      r.discordGuildMember &&
+      r.ubisoftLinked &&
+      r.communityVerified
+    ) {
+
+      membership = updateMembership(
+        req.params.userId,
+        {
+          status: "active",
+
+          stats: {
+            enabled: true,
+            public: true
+          }
+        }
+      );
+
+    }
+
+
+    res.json({
+      ok: true,
+      membership
+    });
+
+  });
+
+
   app.get("/api/profile/:discordId", requireApiKey, (req, res) => {
     const profiles = loadJson(R6_PROFILES_FILE);
     const profile = profiles[req.params.discordId];
