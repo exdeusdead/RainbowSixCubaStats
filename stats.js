@@ -1910,6 +1910,31 @@ function startApiServer() {
   });
 
 
+
+  app.post("/api/internal/r6/membership/:userId/ubisoft", requireApiKey, (req, res) => {
+    const membership = updateMembership(
+      req.params.userId,
+      {
+        requirements: {
+          ubisoftLinked: true
+        }
+      }
+    );
+
+    if (!membership) {
+      return res.status(404).json({
+        ok: false,
+        error: "MEMBERSHIP_NOT_FOUND"
+      });
+    }
+
+    res.json({
+      ok: true,
+      membership
+    });
+  });
+
+
   app.get("/api/profile/:discordId", requireApiKey, (req, res) => {
     const profiles = loadJson(R6_PROFILES_FILE);
     const profile = profiles[req.params.discordId];
