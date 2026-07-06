@@ -605,6 +605,8 @@ function getProfileView(profile) {
     .slice(0, 5);
 
   return {
+    userId: profile.userId || null,
+    providers: profile.providers || null,
     discordId: profile.discordId,
     discordTag: profile.discordTag,
     ubisoftName: profile.ubisoftName,

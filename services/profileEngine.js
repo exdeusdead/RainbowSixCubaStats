@@ -108,6 +108,8 @@ function getPlayerProfile(profile) {
   const overview = getOverview(profile);
 
   return {
+    userId: profile.userId || null,
+    providers: profile.providers || null,
     discordId: profile.discordId,
     discordTag: profile.discordTag,
     ubisoftName: profile.ubisoftName,
