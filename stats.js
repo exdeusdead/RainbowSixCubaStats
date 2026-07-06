@@ -36,6 +36,11 @@ const cors = require("cors");
 const { requireCgpUser } = require("./services/cgpAuth");
 
 const {
+  getMembership,
+  createMembership
+} = require("./services/r6Membership");
+
+const {
   Client,
   GatewayIntentBits,
   SlashCommandBuilder,
@@ -1850,6 +1855,27 @@ function startApiServer() {
       ok: true,
       userId: req.cgpUser.id,
       profile: getProfileView(profile)
+    });
+  });
+
+
+
+  app.get("/api/r6/membership/me", requireCgpUser, (req, res) => {
+    const membership = getMembership(req.cgpUser.id);
+
+    res.json({
+      ok: true,
+      membership
+    });
+  });
+
+
+  app.post("/api/r6/membership/join", requireCgpUser, (req, res) => {
+    const membership = createMembership(req.cgpUser);
+
+    res.json({
+      ok: true,
+      membership
     });
   });
 
