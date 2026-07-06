@@ -33,6 +33,7 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
+const { requireCgpUser } = require("./services/cgpAuth");
 
 const {
   Client,
@@ -1780,11 +1781,18 @@ function startApiServer() {
   // Combined sync endpoint used by the Chrome extension.
   // It accepts all captured sections in one request:
   // { discordId, ubisoftName, sections: { overview, matches, seasons, operators, maps } }
-  app.post("/api/snapshot-bundle", requireApiKey, async (req, res) => {
-    const result = saveFullProfilePayload(req.body || {});
+  app.post("/api/snapshot-bundle", requireApiKey, requireCgpUser, async (req, res) => {
+    const payload = {
+      ...(req.body || {}),
+      userId: req.cgpUser.userId,
+      discordId: req.cgpUser.providers?.discord?.id,
+      providers: req.cgpUser.providers
+    };
+
+    const result = saveFullProfilePayload(payload);
     if (!result.ok) return res.status(400).json(result);
 
-    await refreshMemberRoles(String(req.body.discordId)).catch(() => {});
+    await refreshMemberRoles(String(payload.discordId)).catch(() => {});
     if (globalThis.__r6StatsGuild) await publishPanels(globalThis.__r6StatsGuild).catch(() => {});
 
     res.json(result);
