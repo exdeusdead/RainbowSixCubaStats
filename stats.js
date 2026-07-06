@@ -1784,9 +1784,12 @@ function startApiServer() {
   app.post("/api/snapshot-bundle", requireApiKey, requireCgpUser, async (req, res) => {
     const payload = {
       ...(req.body || {}),
-      userId: req.cgpUser.userId,
-      discordId: req.cgpUser.providers?.discord?.id,
-      providers: req.cgpUser.providers
+      userId: req.cgpUser.id,
+      discordId: req.cgpUser.identities?.discord?.id,
+      providers: {
+        discord: req.cgpUser.identities?.discord || null,
+        ubisoft: req.cgpUser.identities?.ubisoft || null
+      }
     };
 
     const result = saveFullProfilePayload(payload);
