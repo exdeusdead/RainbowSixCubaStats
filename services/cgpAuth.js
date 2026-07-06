@@ -1,6 +1,6 @@
 const CGP_AUTH_URL =
   process.env.CGP_AUTH_URL ||
-  "http://localhost:3010/api/auth/me";
+  "http://localhost:3030/api/auth/me";
 
 async function validateCgpToken(token) {
   if (!token) return null;
@@ -16,7 +16,7 @@ async function validateCgpToken(token) {
 
     const data = await response.json();
 
-    if (!data?.user?.userId) return null;
+    if (!data?.user?.id) return null;
 
     return data.user;
   } catch {
