@@ -1989,6 +1989,50 @@ function startApiServer() {
   });
 
 
+
+  app.get("/api/public/player/:name", (req, res) => {
+    const profiles = loadJson(R6_PROFILES_FILE);
+    const memberships = loadJson(path.join(DATA_DIR, "r6_memberships.json"));
+
+    const name = String(req.params.name || "").toLowerCase();
+
+    const profile = Object.values(profiles).find(p =>
+      String(p.ubisoftName || "").toLowerCase() === name ||
+      String(p.discordTag || "").toLowerCase() === name ||
+      String(p.userId || "").toLowerCase() === name
+    );
+
+    if (!profile) {
+      return res.status(404).json({
+        ok: false,
+        error: "PLAYER_NOT_FOUND"
+      });
+    }
+
+    const membership = memberships[profile.userId];
+
+    if (
+      !membership ||
+      membership.status !== "active" ||
+      !membership.stats?.public
+    ) {
+      return res.status(403).json({
+        ok: false,
+        error: "PLAYER_NOT_PUBLIC"
+      });
+    }
+
+    res.json({
+      ok: true,
+      profile: getProfileView(profile),
+      membership: {
+        status: membership.status,
+        stats: membership.stats
+      }
+    });
+  });
+
+
   app.get("/api/profile/:discordId", requireApiKey, (req, res) => {
     const profiles = loadJson(R6_PROFILES_FILE);
     const profile = profiles[req.params.discordId];
