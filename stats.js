@@ -1990,6 +1990,31 @@ function startApiServer() {
 
 
 
+
+  app.get("/api/public/players", (req, res) => {
+    const profiles = loadJson(R6_PROFILES_FILE);
+    const memberships = loadJson(path.join(DATA_DIR, "r6_memberships.json"));
+
+    const players = Object.values(profiles)
+      .filter(profile => {
+        const membership = memberships[profile.userId];
+
+        return (
+          membership &&
+          membership.status === "active" &&
+          membership.stats?.public
+        );
+      })
+      .map(profile => getProfileView(profile))
+      .sort((a, b) => (b.rank?.currentRp || 0) - (a.rank?.currentRp || 0));
+
+    res.json({
+      ok: true,
+      players
+    });
+  });
+
+
   app.get("/api/public/player/:name", (req, res) => {
     const profiles = loadJson(R6_PROFILES_FILE);
     const memberships = loadJson(path.join(DATA_DIR, "r6_memberships.json"));
