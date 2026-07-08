@@ -41,6 +41,46 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
+
+function parseTrackerOverview(rawText) {
+
+  const text = String(rawText || "");
+
+
+  function findNumber(regex) {
+    const match = text.match(regex);
+    return match ? Number(match[1].replace(",", "")) : null;
+  }
+
+
+  const rankMatch = text.match(
+    /(Copper|Bronze|Silver|Gold|Platinum|Emerald|Diamond|Champion)\s+[IVX]+/i
+  );
+
+
+  return {
+
+    currentRank: rankMatch
+      ? rankMatch[0].toUpperCase()
+      : "UNKNOWN",
+
+    currentRp:
+      findNumber(/([\d,]+)\s*RP/i),
+
+    seasonKd:
+      findNumber(/KD\s*Ratio\s*([\d.]+)/i)
+      || findNumber(/KD\s*([\d.]+)/i),
+
+    seasonWinRate:
+      findNumber(/Win\s*Rate\s*([\d.]+)/i)
+
+  };
+
+}
+
+
+
 function captureCurrentPage() {
   const rawText = (document.body && document.body.innerText ? document.body.innerText : "").slice(0, 160000);
   const trackerUrl = window.location.href;
@@ -125,10 +165,7 @@ async function startTemporarySync() {
 
     ubisoftName,
 
-    rank:{
-      currentRank:"PENDING",
-      currentRp:0
-    },
+    rank:parseTrackerOverview(captured.rawText),
 
     metadata:{
       source:"temporary-companion",
