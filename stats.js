@@ -1076,13 +1076,13 @@ function connectPanelEmbed() {
     .setColor("#00BFFF")
     .setTitle("🔗 Conectar Ubisoft | Rainbow Six CUBA")
     .setDescription(
-      "Conectar Ubisoft es **opcional** y solo es necesario si quieres mostrar tus estadísticas, rango, KD, WR y participar en tablas/rankings del servidor.\n\n" +
-      "Para completar el proceso necesitas instalar la extensión oficial de Rainbow Six CUBA y abrir tu enlace público de R6 Tracker. No se solicitan contraseñas, correos ni acceso a Ubisoft."
+      "Conecta tu Ubisoft ID para activar tu perfil competitivo en Rainbow Six CUBA.\n\n" +
+      "Este proceso permite mostrar rango, RP, KD, WR y estadísticas públicas dentro del servidor y el website oficial. No se solicitan contraseñas, correos ni acceso a tu cuenta de Ubisoft."
     )
     .addFields(
-      { name: "Estados visibles", value: `• **${SYNC_ROLES.PENDING}** — registraste Ubisoft, falta una captura válida.\n• **${SYNC_ROLES.VERIFIED}** — tu perfil fue sincronizado correctamente.`, inline: false },
-      { name: "Después de verificar", value: "El sistema intentará cambiar tu nickname del servidor a tu Ubisoft Name. Si Discord no lo permite por permisos, no pasa nada; el rol verificado será suficiente.", inline: false },
-      { name: "Privacidad", value: "Solo se procesa información pública visible en R6 Tracker. La extensión no lee contraseñas, mensajes privados ni páginas fuera del flujo autorizado.", inline: false }
+      { name: "Cómo funciona", value: "1. Presiona **Conectar Ubisoft**.\n2. Escribe tu Ubisoft ID.\n3. Abre el enlace generado.\n4. Companion sincroniza tus estadísticas públicas automáticamente.", inline: false },
+      { name: "Estados", value: `• **${SYNC_ROLES.PENDING}** — Ubisoft registrado, esperando sincronización.\n• **${SYNC_ROLES.VERIFIED}** — perfil sincronizado correctamente.`, inline: false },
+      { name: "Privacidad", value: "Solo se procesa información pública visible en R6 Tracker. No se leen contraseñas, mensajes privados ni información fuera del flujo autorizado.", inline: false }
     )
     .setFooter({ text: `RainbowSixCubaStats ${BOT_VERSION}` });
 }
@@ -1557,7 +1557,7 @@ client.on("interactionCreate", async interaction => {
         return interaction.editReply({
           content:
             `🔄 Sync solicitado para **${profile.ubisoftName}**.\n\n` +
-            "Abre el enlace de R6 Tracker. Si tienes la extensión instalada, la captura se enviará automáticamente. No necesitas iniciar sesión ni navegar manualmente.",
+            "Abre el enlace generado. Si tienes Companion instalado, la sincronización se completará automáticamente. No necesitas iniciar sesión ni navegar manualmente.",
           components: [syncLinkRow(pending.syncUrl)]
         });
       }
@@ -1617,7 +1617,7 @@ client.on("interactionCreate", async interaction => {
         content:
           `✅ Ubisoft registrado: **${ubisoftName}**\n\n` +
           `Estado: **${SYNC_ROLES.PENDING}**\n\n` +
-          "Ahora instala la extensión si no la tienes y abre tu enlace de R6 Tracker para completar la primera sincronización.",
+          "Abre el enlace generado para sincronizar tus estadísticas públicas. Si tienes Companion instalado, el proceso se completará automáticamente.",
         components: [syncLinkRow(pending.syncUrl)],
         flags: MessageFlags.Ephemeral
       });
@@ -1654,7 +1654,7 @@ client.on("interactionCreate", async interaction => {
         content:
           `✅ Ubisoft registrado: **${ubisoftName}**\n\n` +
           `Estado: **${SYNC_ROLES.PENDING}**\n\n` +
-          "Abre el enlace de R6 Tracker con la extensión instalada para completar la sincronización.",
+          "Abre el enlace generado para sincronizar tus estadísticas públicas. Si tienes Companion instalado, el proceso se completará automáticamente.",
         components: [syncLinkRow(pending.syncUrl)],
         flags: MessageFlags.Ephemeral
       });
