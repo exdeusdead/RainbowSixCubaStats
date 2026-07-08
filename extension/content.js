@@ -93,6 +93,76 @@ async function postJson(url, apiKey, body) {
   return data;
 }
 
+
+
+async function startTemporarySync() {
+  const tempMode = getQueryParam("r6cubaTemp");
+
+  if (!tempMode) return false;
+
+
+  const baseUrl = getProfileBaseUrl(window.location.href);
+  const ubisoftName = extractUbisoftNameFromUrl(window.location.href);
+
+  if (!baseUrl || !ubisoftName) return false;
+
+
+  const saved = await chrome.storage.local.get(["apiUrl","apiKey"]);
+
+  const apiUrl = (
+    saved.apiUrl ||
+    "https://api.rainbowsixcuba.com"
+  ).replace(/\/+$/, "");
+
+
+  await sleep(3500);
+
+
+  const captured = captureCurrentPage();
+
+
+  const profile = {
+
+    ubisoftName,
+
+    rank:{
+      currentRank:"PENDING",
+      currentRp:0
+    },
+
+    metadata:{
+      source:"temporary-companion",
+      trackerUrl:baseUrl,
+      capturedAt:new Date().toISOString()
+    },
+
+    raw:{
+      overview:captured
+    }
+
+  };
+
+
+  await postJson(
+    `${apiUrl}/api/temp/snapshot`,
+    saved.apiKey || "",
+    {
+      username:ubisoftName,
+      profile
+    }
+  );
+
+
+  showR6CubaBanner(
+    `Rainbow Six CUBA: preview temporal creado para ${ubisoftName} ✅`
+  );
+
+
+  return true;
+}
+
+
+
 async function startAutoSyncFromDiscordLink() {
   const discordId = getQueryParam("r6cubaSync") || getQueryParam("r6sync");
   if (!discordId) return false;
@@ -188,8 +258,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 (async () => {
   try {
-    await startAutoSyncFromDiscordLink();
-    await processAutoSyncIfNeeded();
+    const tempStarted = await startTemporarySync();
+
+    if (!tempStarted) {
+      await startAutoSyncFromDiscordLink();
+      await processAutoSyncIfNeeded();
+    }
   } catch (error) {
     showR6CubaBanner(`Rainbow Six CUBA: error inicializando sync ❌ ${error.message}`, true);
   }
