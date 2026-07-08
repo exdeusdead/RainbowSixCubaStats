@@ -34,6 +34,7 @@ const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const { requireCgpUser } = require("./services/cgpAuth");
+const { renderProfile } = require("./render/renderer");
 
 const {
   getMembership,
@@ -53,7 +54,8 @@ const {
   TextInputBuilder,
   TextInputStyle,
   PermissionFlagsBits,
-  MessageFlags
+  MessageFlags,
+  AttachmentBuilder
 } = require("discord.js");
 
 const BOT_VERSION = "v1.0.0-extension-api";
@@ -72,6 +74,7 @@ const API_KEY = process.env.STATS_API_KEY || "";
 
 const CONNECT_CHANNEL_NAME = process.env.CONNECT_CHANNEL_NAME || "🔗・conectar-ubisoft";
 const STATS_CHANNEL_NAME = process.env.STATS_CHANNEL_NAME || "📈・r6-stats";
+const STATS_RENDER_CHANNEL_NAME = process.env.STATS_RENDER_CHANNEL_NAME || "🧪・stats-render";
 const RANKINGS_CHANNEL_NAME = process.env.RANKINGS_CHANNEL_NAME || "🏅・tabla-de-rangos";
 const OPERATOR_TOP_CHANNEL_NAME = process.env.OPERATOR_TOP_CHANNEL_NAME || "🎯・top-operadores";
 const COMPETITIVE_DATA_CHANNEL_NAME = process.env.COMPETITIVE_DATA_CHANNEL_NAME || "📊・datos-competitivos";
@@ -1098,6 +1101,37 @@ function connectRows() {
   ];
 }
 
+
+async function publishStatsRenderTest(guild) {
+  const channel = guild.channels.cache.find(c => c.name === STATS_RENDER_CHANNEL_NAME);
+  if (!channel) return;
+
+  const profiles = loadJson(R6_PROFILES_FILE);
+  const profile = Object.values(profiles)[0];
+
+  if (!profile) {
+    await channel.send("No hay perfiles disponibles para renderizar.");
+    return;
+  }
+
+  const imagePath = await renderProfile({
+    name: profile.ubisoftName || profile.discordTag || "player",
+    rank: profile.currentRank || profile.parsedStats?.currentRank || "UNRANKED",
+    rp: profile.currentRp || profile.parsedStats?.currentRp || 0,
+    kd: profile.seasonKd || profile.parsedStats?.seasonKd || 0,
+    wr: profile.seasonWinRate || profile.parsedStats?.seasonWinRate || 0,
+    level: profile.lifetimeLevel || profile.parsedStats?.lifetimeLevel || "-"
+  });
+
+  const attachment = new AttachmentBuilder(imagePath);
+
+  await channel.send({
+    content: "🧪 Stats Render Test",
+    files: [attachment]
+  });
+}
+
+
 function statsSummaryEmbed() {
   const profiles = loadJson(R6_PROFILES_FILE);
   const list = Object.values(profiles);
@@ -1457,6 +1491,11 @@ async function registerCommands(guild) {
       .setDescription("Muestra resumen de perfiles R6 vinculados."),
 
     new SlashCommandBuilder()
+      .setName("rendertest")
+      .setDescription("Publica una prueba visual del Stats Render Engine.")
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+
+    new SlashCommandBuilder()
       .setName("r6leaderboard")
       .setDescription("Muestra ranking R6.")
       .addStringOption(option => option.setName("metric").setDescription("Métrica").setRequired(true).addChoices(
@@ -1687,6 +1726,20 @@ client.on("interactionCreate", async interaction => {
 
     if (interaction.commandName === "r6summary") {
       return interaction.reply({ embeds: [statsSummaryEmbed()], flags: MessageFlags.Ephemeral });
+    }
+
+    if (interaction.commandName === "rendertest") {
+      if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
+        return interaction.reply({ content: "❌ No tienes permisos para usar este comando.", flags: MessageFlags.Ephemeral });
+      }
+
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+      await publishStatsRenderTest(interaction.guild);
+
+      return interaction.editReply({
+        content: `✅ Render enviado a **${STATS_RENDER_CHANNEL_NAME}**.`
+      });
     }
 
     if (interaction.commandName === "r6leaderboard") {
