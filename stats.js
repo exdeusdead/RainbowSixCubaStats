@@ -2015,6 +2015,52 @@ function startApiServer() {
   });
 
 
+
+
+  app.get("/api/temp/player/:name", (req, res) => {
+
+    const username = req.params.name
+      .trim()
+      .toLowerCase();
+
+
+    const profiles = loadJson(R6_PROFILES_FILE);
+
+
+    const existing = Object.values(profiles)
+      .find(p =>
+        p.ubisoftName?.toLowerCase() === username ||
+        p.providers?.ubisoft?.username?.toLowerCase() === username
+      );
+
+
+    if (existing) {
+
+      return res.json({
+
+        ok:true,
+        temporary:false,
+        profile:getProfileView(existing)
+
+      });
+
+    }
+
+
+    res.json({
+
+      ok:true,
+      temporary:true,
+      profile:null,
+      message:"Profile available for temporary lookup"
+
+    });
+
+
+  });
+
+
+
   app.get("/api/public/player/:name", (req, res) => {
     const profiles = loadJson(R6_PROFILES_FILE);
     const memberships = loadJson(path.join(DATA_DIR, "r6_memberships.json"));
