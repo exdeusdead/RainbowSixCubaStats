@@ -61,6 +61,7 @@ const DATA_DIR = path.join(__dirname, "data");
 const LOG_DIR = path.join(__dirname, "logs", "r6stats");
 const SNAPSHOT_DIR = path.join(LOG_DIR, "snapshots");
 const R6_PROFILES_FILE = path.join(DATA_DIR, "r6_profiles.json");
+const TEMP_SNAPSHOTS_FILE = path.join(DATA_DIR, "temp_snapshots.json");
 const R6_LEADERBOARDS_FILE = path.join(DATA_DIR, "r6_leaderboards.json");
 const PENDING_SYNCS_FILE = path.join(DATA_DIR, "pending_syncs.json");
 
@@ -88,6 +89,7 @@ for (const dir of [DATA_DIR, LOG_DIR, SNAPSHOT_DIR]) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 if (!fs.existsSync(R6_PROFILES_FILE)) fs.writeFileSync(R6_PROFILES_FILE, JSON.stringify({}, null, 2));
+if (!fs.existsSync(TEMP_SNAPSHOTS_FILE)) fs.writeFileSync(TEMP_SNAPSHOTS_FILE, JSON.stringify({}, null, 2));
 if (!fs.existsSync(R6_LEADERBOARDS_FILE)) fs.writeFileSync(R6_LEADERBOARDS_FILE, JSON.stringify({}, null, 2));
 if (!fs.existsSync(PENDING_SYNCS_FILE)) fs.writeFileSync(PENDING_SYNCS_FILE, JSON.stringify({}, null, 2));
 
@@ -2017,6 +2019,54 @@ function startApiServer() {
 
 
 
+
+
+  app.post("/api/temp/snapshot", requireApiKey, express.json(), (req, res) => {
+
+    const username = (req.body.username || "")
+      .trim()
+      .toLowerCase();
+
+    const profile = req.body.profile || null;
+
+
+    if (!username || !profile) {
+
+      return res.status(400).json({
+        ok:false,
+        error:"MISSING_TEMP_SNAPSHOT_DATA"
+      });
+
+    }
+
+
+    const snapshots = loadJson(TEMP_SNAPSHOTS_FILE);
+
+
+    snapshots[username] = {
+      username,
+      profile,
+      temporary:true,
+      createdAt:new Date().toISOString(),
+      expiresAt:new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString()
+    };
+
+
+    saveJson(
+      TEMP_SNAPSHOTS_FILE,
+      snapshots
+    );
+
+
+    res.json({
+      ok:true,
+      snapshot:snapshots[username]
+    });
+
+  });
+
+
+
   app.get("/api/temp/player/:name", (req, res) => {
 
     const username = req.params.name
@@ -2041,6 +2091,27 @@ function startApiServer() {
         ok:true,
         temporary:false,
         profile:getProfileView(existing)
+
+      });
+
+    }
+
+
+    const snapshots = loadJson(TEMP_SNAPSHOTS_FILE);
+
+    const temp = snapshots[username];
+
+
+    if (
+      temp &&
+      new Date(temp.expiresAt) > new Date()
+    ) {
+
+      return res.json({
+
+        ok:true,
+        temporary:true,
+        profile:temp.profile
 
       });
 
