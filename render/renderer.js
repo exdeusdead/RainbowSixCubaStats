@@ -71,12 +71,39 @@ async function renderProfile(player){
 
 if(require.main === module){
 
+ const profiles = JSON.parse(
+   fs.readFileSync(
+     path.join(__dirname,"..","data","r6_profiles.json"),
+     "utf8"
+   )
+ );
+
+ const profile = Object.values(profiles)[0];
+
  renderProfile({
-   name:"exdeusdead",
-   rank:"EMERALD I",
-   rp:3975,
-   kd:1.27,
-   wr:55.7
+
+   name:profile.ubisoftName,
+
+   rank:
+     profile.currentRank ||
+     profile.parsedStats?.currentRank ||
+     "UNRANKED",
+
+   rp:
+     profile.currentRp ||
+     profile.parsedStats?.currentRp ||
+     0,
+
+   kd:
+     profile.seasonKd ||
+     profile.parsedStats?.seasonKd ||
+     0,
+
+   wr:
+     profile.seasonWinRate ||
+     profile.parsedStats?.seasonWinRate ||
+     0
+
  }).then(console.log);
 
 }
