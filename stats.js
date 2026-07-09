@@ -1091,114 +1091,35 @@ function connectPanelEmbed() {
     .setFooter({ text: `RainbowSixCubaStats ${BOT_VERSION}` });
 }
 
+
 function connectRows() {
   return [
     new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId("r6_link_button").setLabel("Conectar Ubisoft").setEmoji("🔗").setStyle(ButtonStyle.Primary),
-      new ButtonBuilder().setURL(EXTENSION_LINKS.chromium).setLabel("Extensión Chrome / Brave / Opera GX").setEmoji("🧩").setStyle(ButtonStyle.Link),
-      new ButtonBuilder().setURL(EXTENSION_LINKS.edge).setLabel("Extensión Edge").setEmoji("🔵").setStyle(ButtonStyle.Link),
-      new ButtonBuilder().setURL(EXTENSION_LINKS.firefox).setLabel("Extensión Firefox").setEmoji("🟠").setStyle(ButtonStyle.Link)
-    )
-  ];
-}
-
-
-
-function renderNavigationRows(){
-  return [
-    new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId("render_rank_rp")
-        .setLabel("RP")
-        .setEmoji("🏆")
+        .setCustomId("r6_link_button")
+        .setLabel("Conectar Ubisoft")
+        .setEmoji("🔗")
         .setStyle(ButtonStyle.Primary),
 
       new ButtonBuilder()
-        .setCustomId("render_rank_kd")
-        .setLabel("KD")
-        .setEmoji("🎯")
-        .setStyle(ButtonStyle.Secondary),
-
-      new ButtonBuilder()
-        .setCustomId("render_rank_wr")
-        .setLabel("WR")
-        .setEmoji("📈")
-        .setStyle(ButtonStyle.Secondary),
-
-      new ButtonBuilder()
-        .setCustomId("render_my_profile")
+        .setCustomId("r6_profile_button")
         .setLabel("Mi Perfil")
-        .setEmoji("👤")
-        .setStyle(ButtonStyle.Success)
+        .setEmoji("🎮")
+        .setStyle(ButtonStyle.Secondary),
+
+      new ButtonBuilder()
+        .setCustomId("r6_resync_button")
+        .setLabel("Re-Sync")
+        .setEmoji("🔄")
+        .setStyle(ButtonStyle.Secondary),
+
+      new ButtonBuilder()
+        .setCustomId("r6_status_button")
+        .setLabel("Estado")
+        .setEmoji("✅")
+        .setStyle(ButtonStyle.Secondary)
     )
   ];
-}
-
-
-
-
-async function buildLeaderboardAttachment(metric="rp") {
-
-  const profiles = loadJson(R6_PROFILES_FILE);
-
-  let players = Object.values(profiles)
-    .map(p => ({
-      name: p.ubisoftName || p.discordTag || "player",
-      rank: p.currentRank || p.parsedStats?.currentRank || "UNRANKED",
-      rp: p.currentRp || p.parsedStats?.currentRp || 0,
-      kd: p.seasonKd || p.parsedStats?.seasonKd || 0,
-      wr: p.seasonWinRate || p.parsedStats?.seasonWinRate || 0
-    }));
-
-
-  players.sort((a,b)=>{
-
-    if(metric==="kd") return b.kd-a.kd;
-    if(metric==="wr") return b.wr-a.wr;
-
-    return b.rp-a.rp;
-
-  });
-
-
-  players=players.slice(0,10);
-
-
-  const imagePath = await renderLeaderboard(players);
-
-  return new AttachmentBuilder(imagePath);
-
-}
-
-
-
-async function publishStatsVisualHub(guild) {
-  const channel = guild.channels.cache.find(c => c.name === STATS_CHANNEL_NAME);
-  if (!channel) return;
-
-  const attachment = await buildLeaderboardAttachment("rp");
-
-  await upsertChannelRenderMessage(
-    channel,
-    "stats_visual_hub",
-    attachment.attachment,
-    "📊 Rainbow Six CUBA Competitive Hub",
-    renderNavigationRows()
-  );
-}
-
-
-async function publishStatsRenderTest(guild) {
-  const channel = guild.channels.cache.find(c => c.name === STATS_RENDER_CHANNEL_NAME);
-  if (!channel) return;
-
-  const attachment = await buildLeaderboardAttachment("rp");
-
-  await channel.send({
-    content: "🧪 Stats Render Test",
-    files: [attachment],
-    components: renderNavigationRows()
-  });
 }
 
 
