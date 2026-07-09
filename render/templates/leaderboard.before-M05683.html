@@ -1,0 +1,181 @@
+<html>
+<body>
+
+<div class="shell">
+
+<header>
+  <div>
+    <span class="brand">RAINBOW SIX CUBA</span>
+    <h1>Competitive Hub</h1>
+    <p>Live player intelligence system</p>
+  </div>
+
+  <div class="status">
+    LIVE ●
+  </div>
+</header>
+
+
+<section class="content">
+
+<aside>
+
+<div class="metric">
+<h2>RANKING</h2>
+<p>National Leaderboard</p>
+</div>
+
+<div class="metric">
+<h2>{{COUNT}}</h2>
+<p>Verified Players</p>
+</div>
+
+<div class="metric">
+<h2>R6</h2>
+<p>Stats Engine</p>
+</div>
+
+</aside>
+
+
+<main>
+
+{{ROWS}}
+
+</main>
+
+
+</section>
+
+
+<footer>
+RP Ranking • KD Ranking • Win Rate • Operators • Maps
+</footer>
+
+
+</div>
+
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#030712;
+color:white;
+}
+
+
+.shell{
+width:1200px;
+height:675px;
+padding:45px;
+background:
+radial-gradient(circle at 90% 10%,#e11d4866,transparent 35%),
+linear-gradient(135deg,#030712,#111827);
+}
+
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:start;
+}
+
+
+.brand{
+color:#ff1744;
+font-size:14px;
+letter-spacing:5px;
+}
+
+
+h1{
+font-size:52px;
+margin:15px 0 5px;
+}
+
+
+p{
+color:#94a3b8;
+}
+
+
+.status{
+background:#052e16;
+color:#22c55e;
+padding:12px 25px;
+border-radius:50px;
+font-weight:bold;
+}
+
+
+.content{
+display:grid;
+grid-template-columns:280px 1fr;
+gap:30px;
+margin-top:45px;
+}
+
+
+.metric{
+background:#0f172acc;
+border:1px solid #1e293b;
+border-radius:22px;
+padding:25px;
+margin-bottom:18px;
+}
+
+
+.metric h2{
+font-size:34px;
+margin:0;
+}
+
+
+.player{
+background:#020617cc;
+border:1px solid #334155;
+border-radius:22px;
+padding:22px 28px;
+margin-bottom:18px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+
+.name{
+font-size:28px;
+font-weight:bold;
+}
+
+
+.rank{
+color:#22c55e;
+font-size:22px;
+font-weight:bold;
+}
+
+
+.stats{
+display:flex;
+gap:30px;
+font-size:20px;
+}
+
+
+footer{
+margin-top:30px;
+color:#64748b;
+}
+
+</style>
+
+
+</body>
+</html>
