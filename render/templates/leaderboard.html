@@ -1,47 +1,55 @@
 <html>
-
 <body>
 
-<div class="app">
+<div class="shell">
 
 <header>
+  <div>
+    <span class="brand">RAINBOW SIX CUBA</span>
+    <h1>Competitive Hub</h1>
+    <p>Live player intelligence system</p>
+  </div>
 
-<div>
-<span>RAINBOW SIX CUBA</span>
-<h1>Competitive Dashboard</h1>
-</div>
-
-<nav>
-Overview • Ranking • Operators • Maps
-</nav>
-
+  <div class="status">
+    LIVE ●
+  </div>
 </header>
 
 
-<table>
+<section class="content">
 
-<thead>
-<tr>
-<th>#</th>
-<th>Player</th>
-<th>Rank</th>
-<th>RP</th>
-<th>KD</th>
-<th>WR</th>
-</tr>
-</thead>
+<aside>
 
-<tbody>
+<div class="metric">
+<h2>RANKING</h2>
+<p>National Leaderboard</p>
+</div>
+
+<div class="metric">
+<h2>{{COUNT}}</h2>
+<p>Verified Players</p>
+</div>
+
+<div class="metric">
+<h2>R6</h2>
+<p>Stats Engine</p>
+</div>
+
+</aside>
+
+
+<main>
 
 {{ROWS}}
 
-</tbody>
+</main>
 
-</table>
+
+</section>
 
 
 <footer>
-Live Stats Engine
+RP Ranking • KD Ranking • Win Rate • Operators • Maps
 </footer>
 
 
@@ -50,68 +58,119 @@ Live Stats Engine
 
 <style>
 
+*{
+box-sizing:border-box;
+}
+
 body{
 margin:0;
-font-family:Arial;
-background:#020617;
+font-family:Arial,Helvetica,sans-serif;
+background:#030712;
 color:white;
 }
 
 
-.app{
+.shell{
 width:1200px;
 height:675px;
 padding:45px;
 background:
-radial-gradient(circle at top right,#dc262655,transparent 40%),
-linear-gradient(135deg,#020617,#111827);
+radial-gradient(circle at 90% 10%,#e11d4866,transparent 35%),
+linear-gradient(135deg,#030712,#111827);
 }
 
 
 header{
 display:flex;
 justify-content:space-between;
+align-items:start;
 }
 
 
-span{
-color:#ef4444;
+.brand{
+color:#ff1744;
+font-size:14px;
 letter-spacing:5px;
 }
 
 
 h1{
-font-size:42px;
+font-size:52px;
+margin:15px 0 5px;
 }
 
 
-nav{
+p{
 color:#94a3b8;
 }
 
 
-table{
-margin-top:40px;
-width:100%;
-border-collapse:collapse;
-background:#020617aa;
+.status{
+background:#052e16;
+color:#22c55e;
+padding:12px 25px;
+border-radius:50px;
+font-weight:bold;
 }
 
 
-th,td{
-padding:18px;
-text-align:left;
+.content{
+display:grid;
+grid-template-columns:280px 1fr;
+gap:30px;
+margin-top:45px;
 }
 
 
-td{
-border-top:1px solid #334155;
+.metric{
+background:#0f172acc;
+border:1px solid #1e293b;
+border-radius:22px;
+padding:25px;
+margin-bottom:18px;
+}
+
+
+.metric h2{
+font-size:34px;
+margin:0;
+}
+
+
+.player{
+background:#020617cc;
+border:1px solid #334155;
+border-radius:22px;
+padding:22px 28px;
+margin-bottom:18px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+
+.name{
+font-size:28px;
+font-weight:bold;
+}
+
+
+.rank{
+color:#22c55e;
 font-size:22px;
+font-weight:bold;
+}
+
+
+.stats{
+display:flex;
+gap:30px;
+font-size:20px;
 }
 
 
 footer{
-margin-top:35px;
+margin-top:30px;
 color:#64748b;
 }
 
@@ -119,5 +178,4 @@ color:#64748b;
 
 
 </body>
-
 </html>

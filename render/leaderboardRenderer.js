@@ -16,22 +16,29 @@ let template=fs.readFileSync(
 
 const rows=players.map((p,i)=>`
 
-<tr>
-<td>#${i+1}</td>
-<td>${p.name}</td>
-<td>${p.rank}</td>
-<td>${p.rp}</td>
-<td>${p.kd}</td>
-<td>${p.wr}%</td>
-</tr>
+<div class="player">
+
+<div>
+<div class="name">#${i+1} ${p.name}</div>
+<div class="rank">${p.rank}</div>
+</div>
+
+
+<div class="stats">
+<div>${p.rp}<br>RP</div>
+<div>${p.kd}<br>KD</div>
+<div>${p.wr}%<br>WR</div>
+</div>
+
+
+</div>
 
 `).join("");
 
 
-template=template.replace(
- "{{ROWS}}",
- rows
-);
+template=template
+.replace("{{ROWS}}",rows)
+.replace("{{COUNT}}",players.length);
 
 
 return renderHtml(
