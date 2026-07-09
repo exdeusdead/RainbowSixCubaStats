@@ -35,6 +35,7 @@ const express = require("express");
 const cors = require("cors");
 const { requireCgpUser } = require("./services/cgpAuth");
 const { renderProfile } = require("./render/renderer");
+const { renderLeaderboard } = require("./render/leaderboardRenderer");
 
 const {
   getMembership,
@@ -1102,32 +1103,84 @@ function connectRows() {
 }
 
 
+
+function renderNavigationRows(){
+  return [
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("render_rank_rp")
+        .setLabel("RP")
+        .setEmoji("🏆")
+        .setStyle(ButtonStyle.Primary),
+
+      new ButtonBuilder()
+        .setCustomId("render_rank_kd")
+        .setLabel("KD")
+        .setEmoji("🎯")
+        .setStyle(ButtonStyle.Secondary),
+
+      new ButtonBuilder()
+        .setCustomId("render_rank_wr")
+        .setLabel("WR")
+        .setEmoji("📈")
+        .setStyle(ButtonStyle.Secondary),
+
+      new ButtonBuilder()
+        .setCustomId("render_my_profile")
+        .setLabel("Mi Perfil")
+        .setEmoji("👤")
+        .setStyle(ButtonStyle.Success)
+    )
+  ];
+}
+
+
+
+
+async function buildLeaderboardAttachment(metric="rp") {
+
+  const profiles = loadJson(R6_PROFILES_FILE);
+
+  let players = Object.values(profiles)
+    .map(p => ({
+      name: p.ubisoftName || p.discordTag || "player",
+      rank: p.currentRank || p.parsedStats?.currentRank || "UNRANKED",
+      rp: p.currentRp || p.parsedStats?.currentRp || 0,
+      kd: p.seasonKd || p.parsedStats?.seasonKd || 0,
+      wr: p.seasonWinRate || p.parsedStats?.seasonWinRate || 0
+    }));
+
+
+  players.sort((a,b)=>{
+
+    if(metric==="kd") return b.kd-a.kd;
+    if(metric==="wr") return b.wr-a.wr;
+
+    return b.rp-a.rp;
+
+  });
+
+
+  players=players.slice(0,10);
+
+
+  const imagePath = await renderLeaderboard(players);
+
+  return new AttachmentBuilder(imagePath);
+
+}
+
+
 async function publishStatsRenderTest(guild) {
   const channel = guild.channels.cache.find(c => c.name === STATS_RENDER_CHANNEL_NAME);
   if (!channel) return;
 
-  const profiles = loadJson(R6_PROFILES_FILE);
-  const profile = Object.values(profiles)[0];
-
-  if (!profile) {
-    await channel.send("No hay perfiles disponibles para renderizar.");
-    return;
-  }
-
-  const imagePath = await renderProfile({
-    name: profile.ubisoftName || profile.discordTag || "player",
-    rank: profile.currentRank || profile.parsedStats?.currentRank || "UNRANKED",
-    rp: profile.currentRp || profile.parsedStats?.currentRp || 0,
-    kd: profile.seasonKd || profile.parsedStats?.seasonKd || 0,
-    wr: profile.seasonWinRate || profile.parsedStats?.seasonWinRate || 0,
-    level: profile.lifetimeLevel || profile.parsedStats?.lifetimeLevel || "-"
-  });
-
-  const attachment = new AttachmentBuilder(imagePath);
+  const attachment = await buildLeaderboardAttachment("rp");
 
   await channel.send({
     content: "🧪 Stats Render Test",
-    files: [attachment]
+    files: [attachment],
+    components: renderNavigationRows()
   });
 }
 
@@ -1558,6 +1611,54 @@ client.once("clientReady", async () => {
 client.on("interactionCreate", async interaction => {
   try {
     if (interaction.isButton()) {
+      if (interaction.customId === "render_my_profile") {
+        await interaction.deferUpdate();
+
+        const profiles = loadJson(R6_PROFILES_FILE);
+        const profile = profiles[interaction.user.id];
+
+        if (!profile) {
+          return interaction.followUp({
+            content: "❌ No tienes perfil conectado en Rainbow Six CUBA.",
+            flags: MessageFlags.Ephemeral
+          });
+        }
+
+        const imagePath = await renderProfile({
+          name: profile.ubisoftName || profile.discordTag || "player",
+          rank: profile.currentRank || profile.parsedStats?.currentRank || "UNRANKED",
+          rp: profile.currentRp || profile.parsedStats?.currentRp || 0,
+          kd: profile.seasonKd || profile.parsedStats?.seasonKd || 0,
+          wr: profile.seasonWinRate || profile.parsedStats?.seasonWinRate || 0,
+          level: profile.lifetimeLevel || profile.parsedStats?.lifetimeLevel || "-"
+        });
+
+        const attachment = new AttachmentBuilder(imagePath);
+
+        return interaction.message.edit({
+          content: "🧪 Stats Render Test — MI PERFIL",
+          files: [attachment],
+          components: renderNavigationRows()
+        });
+      }
+
+      if (["render_rank_rp","render_rank_kd","render_rank_wr"].includes(interaction.customId)) {
+        await interaction.deferUpdate();
+
+        const metric =
+          interaction.customId === "render_rank_kd" ? "kd" :
+          interaction.customId === "render_rank_wr" ? "wr" :
+          "rp";
+
+        const attachment = await buildLeaderboardAttachment(metric);
+
+        return interaction.message.edit({
+          content: `🧪 Stats Render Test — ${metric.toUpperCase()}`,
+          files: [attachment],
+          components: renderNavigationRows()
+        });
+      }
+
       if (interaction.customId === "r6_link_button") {
         return interaction.showModal(linkModal());
       }
