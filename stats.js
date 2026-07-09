@@ -1171,6 +1171,23 @@ async function buildLeaderboardAttachment(metric="rp") {
 }
 
 
+
+async function publishStatsVisualHub(guild) {
+  const channel = guild.channels.cache.find(c => c.name === STATS_CHANNEL_NAME);
+  if (!channel) return;
+
+  const attachment = await buildLeaderboardAttachment("rp");
+
+  await upsertChannelRenderMessage(
+    channel,
+    "stats_visual_hub",
+    attachment.attachment,
+    "📊 Rainbow Six CUBA Competitive Hub",
+    renderNavigationRows()
+  );
+}
+
+
 async function publishStatsRenderTest(guild) {
   const channel = guild.channels.cache.find(c => c.name === STATS_RENDER_CHANNEL_NAME);
   if (!channel) return;
@@ -1453,6 +1470,39 @@ function dataCatalogEmbed() {
   return competitivePanelEmbed("overview");
 }
 
+
+async function upsertChannelRenderMessage(channel, key, imagePath, content, components = []) {
+  const file = path.join(DATA_DIR, "stats_messageIds.json");
+  if (!fs.existsSync(file)) fs.writeFileSync(file, JSON.stringify({}, null, 2));
+
+  const ids = loadJson(file);
+  const oldId = ids[key];
+
+  const attachment = new AttachmentBuilder(imagePath);
+
+  const payload = {
+    content,
+    embeds: [],
+    files: [attachment],
+    components
+  };
+
+  if (oldId) {
+    const oldMessage = await channel.messages.fetch(oldId).catch(() => null);
+
+    if (oldMessage) {
+      await oldMessage.edit(payload).catch(() => null);
+      return oldMessage;
+    }
+  }
+
+  const msg = await channel.send(payload);
+  ids[key] = msg.id;
+  saveJson(file, ids);
+  return msg;
+}
+
+
 async function upsertChannelMessage(channel, key, embed, components = []) {
   const file = path.join(DATA_DIR, "stats_messageIds.json");
   if (!fs.existsSync(file)) fs.writeFileSync(file, JSON.stringify({}, null, 2));
@@ -1478,7 +1528,7 @@ async function publishPanels(guild) {
   if (connect) await upsertChannelMessage(connect, "connect_panel", connectPanelEmbed(), connectRows()).catch(error => log(`Panel publish failed | connect | ${error.message}`));
 
   const stats = guild.channels.cache.find(c => c.name === STATS_CHANNEL_NAME);
-  if (stats) await upsertChannelMessage(stats, "stats_summary", statsSummaryEmbed(), statsRows()).catch(error => log(`Panel publish failed | stats | ${error.message}`));
+  if (stats) await publishStatsVisualHub(guild).catch(error => log(`Panel publish failed | stats visual hub | ${error.message}`));
 
   const rankings = guild.channels.cache.find(c => c.name === RANKINGS_CHANNEL_NAME);
   if (rankings) await upsertChannelMessage(rankings, "rank_table", rankTableEmbed("rp"), rankTableRows()).catch(error => log(`Panel publish failed | rankings | ${error.message}`));
