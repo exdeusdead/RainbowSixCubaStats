@@ -1102,10 +1102,11 @@ function connectRows() {
         .setStyle(ButtonStyle.Primary),
 
       new ButtonBuilder()
-        .setCustomId("r6_profile_button")
-        .setLabel("Mi Perfil")
-        .setEmoji("🎮")
+        .setCustomId("r6_install_companion")
+        .setLabel("Instalar Companion")
+        .setEmoji("🧩")
         .setStyle(ButtonStyle.Secondary),
+
 
       new ButtonBuilder()
         .setCustomId("r6_resync_button")
@@ -1392,6 +1393,68 @@ function dataCatalogEmbed() {
 }
 
 
+
+function renderNavigationRows(){
+  return [
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("render_rank_rp")
+        .setLabel("Ranking")
+        .setEmoji("🏆")
+        .setStyle(ButtonStyle.Primary),
+
+      new ButtonBuilder()
+        .setCustomId("render_rank_kd")
+        .setLabel("KD")
+        .setEmoji("🎯")
+        .setStyle(ButtonStyle.Secondary),
+
+      new ButtonBuilder()
+        .setCustomId("render_rank_wr")
+        .setLabel("WR")
+        .setEmoji("📈")
+        .setStyle(ButtonStyle.Secondary),
+
+      new ButtonBuilder()
+        .setCustomId("render_my_profile")
+        .setLabel("Profile")
+        .setEmoji("👤")
+        .setStyle(ButtonStyle.Success)
+    )
+  ];
+}
+
+
+async function publishStatsVisualHub(guild){
+  const channel = guild.channels.cache.find(
+    c => c.name === STATS_CHANNEL_NAME
+  );
+
+  if(!channel) return;
+
+  const profiles = loadJson(R6_PROFILES_FILE);
+
+  const players = Object.values(profiles).map(p=>({
+    name:p.ubisoftName || p.discordTag || "Unknown",
+    rank:p.currentRank || p.parsedStats?.currentRank || "UNRANKED",
+    rp:p.currentRp || p.parsedStats?.currentRp || 0,
+    kd:p.seasonKd || p.parsedStats?.seasonKd || 0,
+    wr:p.seasonWinRate || p.parsedStats?.seasonWinRate || 0
+  }));
+
+  const imagePath = await renderLeaderboard(players);
+
+  await upsertChannelRenderMessage(
+    channel,
+    "stats_visual_hub",
+    imagePath,
+    "📊 Rainbow Six CUBA Competitive Hub",
+    renderNavigationRows()
+  );
+}
+
+
+
 async function upsertChannelRenderMessage(channel, key, imagePath, content, components = []) {
   const file = path.join(DATA_DIR, "stats_messageIds.json");
   if (!fs.existsSync(file)) fs.writeFileSync(file, JSON.stringify({}, null, 2));
@@ -1632,6 +1695,18 @@ client.on("interactionCreate", async interaction => {
 
       if (interaction.customId === "r6_link_button") {
         return interaction.showModal(linkModal());
+      }
+
+
+      if (interaction.customId === "r6_install_companion") {
+        return interaction.reply({
+          content:
+            "🧩 **Rainbow Six CUBA Companion**\n\n" +
+            "El Companion permite sincronizar tus estadísticas públicas de R6 Tracker automáticamente.\n\n" +
+            "Durante la beta recibirás el acceso oficial desde la comunidad.\n\n" +
+            "Cuando esté disponible públicamente, este botón abrirá directamente la tienda de extensiones.",
+          flags: MessageFlags.Ephemeral
+        });
       }
 
       if (interaction.customId === "r6_profile_button") {
